@@ -1,0 +1,78 @@
+<style>
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #374151;
+    padding: 12px 24px;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  #welcome-message {
+    font-weight: bold;
+    color: #e5e7eb;
+  }
+
+  .menu {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .menu a,
+  .menu button {
+    background-color: #e5e7eb; /* Neutral gray */
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-weight: 500;
+    text-decoration: none;
+    color: #1f2937;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  .menu a:hover,
+  .menu button:hover {
+    background-color: #2563eb;
+    color: white;
+  }
+</style>
+
+<header>
+  <div id="welcome-message">Welcome</div>
+  <div class="menu">
+    <a href="/home">Home</a>
+    <a href="/user-guide">User Guide</a>
+    <a href="/example">Example</a>
+    <button onclick="logout()">Logout</button>
+  </div>
+</header>
+
+<script>
+  const auth = localStorage.getItem('auth');
+
+  if (!auth) {
+    window.location.href = '/';
+  } else {
+    fetch('/whoami', {
+      headers: {
+        Authorization: 'Basic ' + auth
+      }
+    })
+    .then(res => res.ok ? res.json() : Promise.reject())
+    .then(user => {
+      document.getElementById('welcome-message').textContent = `Welcome ${user.username}`;
+    })
+    .catch(() => {
+      localStorage.removeItem('auth');
+      window.location.href = '/';
+    });
+  }
+
+  function logout() {
+    localStorage.removeItem('auth');
+    window.location.href = '/';
+  }
+</script>

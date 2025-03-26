@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+ <html lang="en">
+ <head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>SmartTax Agent</title>
+   <script src="https://cdn.tailwindcss.com"></script>
+     <!-- 👇 Chat Widget Styles -->
+  <link rel="stylesheet" href="/chat-widget.css" />
+ </head>
+ <body class="bg-gray-100 flex flex-col h-screen">
+  <div>
+  <h1><b>SmartTax Agent</b></h1><br>
+  <h2><b>📌 Overview</b></h2><br>
+   <p>
+       The <strong>SmartTax Agent</strong> is an intelligent, conversational tax assistant designed to guide you
+       step-by-step through tax calculations, helping you compare multiple scenarios with detailed IRS-referenced
+       explanations. Whether you're optimizing deductions, exploring different filing strategies, or planning ahead,
+       this AI-powered tool makes tax filing easier and more insightful—all for free.
+   </p>
+  <br>
+   <h2><b>🏆 Key Features</b></h2><br>
+   <ul>
+       <li>✅ <strong>Step-by-Step Tax Calculation</strong> – Get guided through your taxes with explanations for each step (if asked), mapped directly to IRS forms.</li>
+       <li>✅ <strong>Multi-Scenario Comparisons</strong> – Explore different tax strategies side by side to maximize your refund.</li>
+       <li>✅ <strong>Full Deduction & Credit Analysis</strong> – Ensure you're not missing any tax breaks, including the AOTC, IRA contributions, and more.</li>
+       <li>✅ <strong>Filing Guidance for All Situations</strong> – From students to families, get tailored insights based on your financial details.</li>
+       <li>✅ <strong>Conversational & Interactive</strong> – Ask questions like <em>“How can I get a full refund?”</em> and get multiple strategic options.</li>
+   </ul>
+   <br>
+  </div>
+
+   <div id="chat-container" class="flex-1 overflow-y-auto p-4 space-y-2 bg-blue-100 border-t border-gray-300 rounded-md shadow-md mx mt">
+      <!-- 💬 Conversation Starters -->
+      <div id="starters" class="flex flex-wrap gap-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+        <span class="text-blue-500 text-sm mr-2">Try asking:</span>
+        <button onclick="sendStarter(this)" class="bg-blue-50 text-sm text-blue-700 px-3 py-1 rounded-full hover:bg-blue-100 transition">List paneer items</button>
+        <button onclick="sendStarter(this)" class="bg-blue-50 text-sm text-blue-700 px-3 py-1 rounded-full hover:bg-blue-100 transition">How can I reduce my taxable income?</button>
+        <button onclick="sendStarter(this)" class="bg-blue-50 text-sm text-blue-700 px-3 py-1 rounded-full hover:bg-blue-100 transition">What's better: Standard or Itemized deduction?</button>
+        <button onclick="sendStarter(this)" class="bg-blue-50 text-sm text-blue-700 px-3 py-1 rounded-full hover:bg-blue-100 transition">Can I claim education credits?</button>
+        <button onclick="sendStarter(this)" class="bg-blue-50 text-sm text-blue-700 px-3 py-1 rounded-full hover:bg-blue-100 transition">Do I qualify for Head of Household?</button>
+      </div>
+   </div>
+
+
+   <div id="input-container" class="flex items-center p-4 bg-white border-t border-gray-300 rounded-md shadow-md mx mt">
+     <textarea id="user-input" rows="1" placeholder="Type your message..." class="flex-1 p-2 border rounded resize-none focus:outline-none focus:ring" onkeydown="handleEnter(event)"></textarea>
+     <button onclick="sendMessage()" class="ml-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Send</button>
+     <button onclick="resetChat()" class="ml-2 px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400">Reset</button>
+   </div>
+ 
+   <script>
+     let sessionId = "session_" + Math.random().toString(36).substring(2);
+ 
+     async function startSession() {
+       const res = await fetch('/start-session', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ session_id: sessionId })
+       });
+       const data = await res.json();
+       console.log('Session started:', data);
+     }
+ 
+     function sendStarter(button) {
+      const input = document.getElementById('user-input');
+      input.value = button.textContent;
+      sendMessage();
+    }
+
+     async function sendMessage() {
+
+       const input = document.getElementById('user-input');
+       const message = input.value.trim();
+       if (!message) return;
+ 
+       appendMessage('user', message);
+       document.getElementById('starters')?.classList.add('hidden');
+       input.value = '';
+ 
+       // Typing indicator
+       appendMessage('assistant', 'Typing...', true);
+ 
+       const res = await fetch('/send-message', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ session_id: sessionId, message })
+       });
+ 
+       const data = await res.json();
+       removeTyping();
+       appendMessage('assistant', data.response);
+     }
+ 
+     async function resetChat() {
+       await fetch('/clear-session', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ session_id: sessionId })
+       });
+       sessionId = "session_" + Math.random().toString(36).substring(2);
+       await startSession();
+       document.getElementById('chat-container').innerHTML = '';
+     }
+ 
+     function appendMessage(role, content, isTyping = false) {
+       const div = document.createElement('div');
+       div.className = `message ${role}`;
+       div.classList.add("text-sm", "rounded", "p-2", "max-w-xl", "whitespace-pre-wrap");
+ 
+       const roleClasses = role === 'user'
+         ? ["bg-blue-100", "self-end"]
+         : ["bg-green-100", "self-start"];
+       div.classList.add(...roleClasses);
+ 
+       div.textContent = `${role === 'user' ? 'You' : 'Assistant'}: ${content}`;
+       if (isTyping) div.id = "typing-indicator";
+ 
+       const time = document.createElement('div');
+       time.className = "text-xs text-gray-500 mt-1";
+       time.textContent = new Date().toLocaleTimeString();
+       div.appendChild(time);
+ 
+       document.getElementById('chat-container').appendChild(div);
+       div.scrollIntoView({ behavior: 'smooth' });
+     }
+ 
+     function removeTyping() {
+       const typing = document.getElementById('typing-indicator');
+       if (typing) typing.remove();
+     }
+ 
+     function handleEnter(event) {
+       if (event.key === 'Enter' && !event.shiftKey) {
+         event.preventDefault();
+         sendMessage();
+       }
+     }
+ 
+     // Initialize
+     startSession();
+   </script>
+ </body>
+ </html>

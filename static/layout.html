@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>SmartTax Agent</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- Base Styles -->
+  <link rel="stylesheet" href="/static/styles.css" />
+  <link rel="stylesheet" href="/static/chat-widget.css" />
+</head>
+<body>
+  <div id="header"></div>
+
+  <main id="content">
+    <!-- Page content will be injected here -->
+  </main>
+
+  <div id="footer"></div>
+
+  <script>
+    const auth = localStorage.getItem('auth');
+    if (!auth) {
+      window.location.href = '/';
+    }
+
+    function logout() {
+      localStorage.removeItem('auth');
+      window.location.href = '/';
+    }
+
+    function injectCommon() {
+      fetch('/static/header.html')
+        .then(res => res.text())
+        .then(html => {
+          document.getElementById('header').innerHTML = html;
+
+          fetch('/whoami', {
+            headers: {
+              Authorization: 'Basic ' + auth
+            }
+          })
+          .then(res => res.ok ? res.json() : Promise.reject())
+          .then(user => {
+            document.getElementById('welcome-message').textContent = `Welcome ${user.username}`;
+          })
+          .catch(() => logout());
+        });
+
+      fetch('/static/footer.html')
+        .then(res => res.text())
+        .then(html => {
+          document.getElementById('footer').innerHTML = html;
+        });
+    }
+
+    function loadPage(page) {
+      console.log("📦 Loading page:", page);
+      fetch('/static/' + page + '.html')
+        .then(res => res.text())
+        .then(html => {
+          document.getElementById('content').innerHTML = html;
+
+          // ✅ Dynamically load chat widget ONLY for home page
+          if (page === 'home') {
+            console.log("💬 Injecting chat-widget.js");
+            const script = document.createElement('script');
+            script.src = '/static/js/chat-widget.js';
+            script.onload = () => console.log('✅ chat-widget.js loaded and executed');
+            script.onerror = () => console.error('❌ Failed to load chat-widget.js');
+            document.body.appendChild(script);
+          }
+        });
+    }
+
+    // Detect route
+    const path = window.location.pathname;
+    let page = 'home'; // default
+    if (path.includes('user-guide')) page = 'user_guide';
+    else if (path.includes('example')) page = 'example';
+    else if (path.includes('home')) page = 'home';
+
+    injectCommon();
+    loadPage(page);
+  </script>
+</body>
+</html>

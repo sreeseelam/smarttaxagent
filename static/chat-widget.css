@@ -1,0 +1,156 @@
+.chat-wrapper {
+margin: 10px auto;
+font-family: Arial, sans-serif;
+}
+
+.chat-starters {
+display: flex;
+flex-wrap: wrap;
+gap: 10px;
+padding-bottom: 2px;
+}
+
+.chat-hint {
+font-size: 14px;
+color: #555;
+margin-right: 8px;
+padding: 6px 12px;
+}
+
+.chat-starter-button {
+background-color: #e0ecff;
+color: #555;
+border: none;
+padding: 6px 12px;
+border-radius: 16px;
+cursor: pointer;
+font-size: 0.9rem;
+}
+
+.chat-starter-button:hover {
+background-color: #d2e8ff;
+}
+
+.chat-input-container {
+display: flex;
+gap: 10px;
+margin-top: 16px;
+}
+
+.chat-textarea {
+flex: 1;
+padding: 10px;
+border-radius: 6px;
+border: 1px solid #ccc;
+resize: none;
+font-size: 14px;
+}
+
+.chat-send-button {
+background-color: #007bff;
+color: white;
+padding: 10px 16px;
+border-radius: 6px;
+border: none;
+cursor: pointer;
+}
+
+.chat-reset-button {
+background-color: #e0e0e0;
+color: #333;
+padding: 10px 16px;
+border-radius: 6px;
+border: none;
+cursor: pointer;
+}
+
+.timestamp {
+font-size: 0.75rem;
+color: #666;
+margin-top: 4px;
+}  
+
+.chat-container {
+    background-color: transparent;
+    border: 1px solid #ccc;
+    padding: 1px;
+    border-radius: 8px;
+    height: 475px; /* ✅ Limit overall height */
+    max-height: 475px; /* ✅ Limit overall height */
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* ✅ Scrollable message area */
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 1px;
+    max-height: 450px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+
+/* Other styling for messages */
+
+.message.user {
+  background-color: #e0e0e0; /* light grey */
+    text-align: right;
+    margin-left: auto;
+}
+
+.message.assistant {
+    background-color: transparent;
+    text-align: left;
+    margin-right: auto;
+}
+  
+.message table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 0.95rem;
+}
+
+.message th,
+.message td {
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    text-align: left;
+}
+
+.message th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+}
+
+.message p {
+    margin: 2px 0 !important;
+    line-height: 1.4 !important;
+    padding: 0 !important;
+}
+
+.message ul,
+.message ol {
+  margin: 4px 0 4px 1.25em;
+  padding-left: 1em;
+}
+
+.message li {
+  margin: 2px 0;
+}
+
+
+.message {
+    margin-bottom: 8px; /* was probably 12px or more */
+  }
+
+.message div {
+    margin: 2px 0;
+    line-height: 1.4;
+}
+  
+.message br {
+    margin: 4px 0 !important;
+}
