@@ -47,6 +47,10 @@ def home(user: dict = Depends(get_current_user)):
 def user_guide(user: dict = Depends(get_current_user)):
     return FileResponse(os.path.join(PROTECTED_HTML_DIR, "layout.html"))
 
+@app.get("/architecture", response_class=HTMLResponse)
+def architecture(user: dict = Depends(get_current_user)):
+    return FileResponse(os.path.join(PROTECTED_HTML_DIR, "layout.html"))
+
 @app.get("/example", response_class=HTMLResponse)
 def example(user: dict = Depends(get_current_user)):
     return FileResponse(os.path.join(PROTECTED_HTML_DIR, "layout.html"))
