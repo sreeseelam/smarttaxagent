@@ -19,21 +19,25 @@
 
   <script>
     const auth = localStorage.getItem('auth');
+    const role = localStorage.getItem('role') || 'IndividualUser';
+
     if (!auth) {
       window.location.href = '/';
     }
 
     function logout() {
       localStorage.removeItem('auth');
+      localStorage.removeItem('role');
       window.location.href = '/';
     }
 
     function injectCommon() {
-      fetch('/static/header.html')
+      fetch('/static/protected/header.html')
         .then(res => res.text())
         .then(html => {
           document.getElementById('header').innerHTML = html;
 
+          // Fetch username and inject into header
           fetch('/whoami', {
             headers: {
               Authorization: 'Basic ' + auth
@@ -46,7 +50,7 @@
           .catch(() => logout());
         });
 
-      fetch('/static/footer.html')
+      fetch('/static/protected/footer.html')
         .then(res => res.text())
         .then(html => {
           document.getElementById('footer').innerHTML = html;
@@ -55,18 +59,17 @@
 
     function loadPage(page) {
       console.log("📦 Loading page:", page);
-      fetch('/static/' + page + '.html')
+      fetch('/static/protected/' + page + '.html')
         .then(res => res.text())
         .then(html => {
           document.getElementById('content').innerHTML = html;
 
-          // ✅ Dynamically load chat widget ONLY for home page
+          // ✅ Inject chat-widget only on home page
           if (page === 'home') {
-            console.log("💬 Injecting chat-widget.js");
+            console.log("💬 Injecting chat-widget.js for role:", role);
             const script = document.createElement('script');
-            script.src = '/static/js/chat-widget.js';
-            script.onload = () => console.log('✅ chat-widget.js loaded and executed');
-            script.onerror = () => console.error('❌ Failed to load chat-widget.js');
+            script.src = `/static/protected/js/chat-widget.js`;
+            script.defer = true;
             document.body.appendChild(script);
           }
         });
@@ -75,6 +78,7 @@
     // Detect route
     const path = window.location.pathname;
     let page = 'home'; // default
+
     if (path.includes('user-guide')) page = 'user_guide';
     else if (path.includes('example')) page = 'example';
     else if (path.includes('home')) page = 'home';

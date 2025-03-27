@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>SmartTax Agent - Logged Out</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <main style="padding: 40px; text-align: center;">
+    <h2>You’ve been successfully logged out.</h2>
+    <p><a href="/">Click here</a> to return to the login page.</p>
+  </main>
+
+  <script>
+    localStorage.clear(); // Clear auth, role, username, etc.
+  </script>
+</body>
+</html>

@@ -1,16 +1,17 @@
 from fastapi import FastAPI, Request, Depends, HTTPException, status
-from fastapi.responses import HTMLResponse, FileResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 import secrets
 import os
+
+from auth import get_current_user
 from smarttaxagent_api import router as smarttaxagent_router
 
 app = FastAPI()
-app.include_router(smarttaxagent_router)
 
-# Allow frontend JS to call /whoami without CORS issues
+# CORS for frontend JS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -19,50 +20,36 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Static files setup
+# Static public assets
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Basic HTTP authentication
-security = HTTPBasic()
-
-# Hardcoded users and roles
-users_db = {
-    "IndividualUser": {
-        "username": "IndividualUser",
-        "password": "IndividualUser",
-        "role": "Individual"
-    },
-    "TaxSpecialist": {
-        "username": "TaxSpecialist",
-        "password": "TaxSpecialist",
-        "role": "Specialist"
-    }
-}
-
-def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
-    user = users_db.get(credentials.username)
-    if user and secrets.compare_digest(credentials.password, user["password"]):
-        return user
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid authentication",
-        headers={"WWW-Authenticate": "Basic"},
-    )
-
+# Base directories
 BASE_DIR = os.path.dirname(__file__)
 STATIC_HTML_DIR = os.path.join(BASE_DIR, "static")
+PROTECTED_HTML_DIR = os.path.join(BASE_DIR, "static/protected")
 
+# Public login page
 @app.get("/", response_class=HTMLResponse)
 async def login_page():
     return FileResponse(os.path.join(STATIC_HTML_DIR, "login.html"))
 
+# Expose whoami for frontend role/username
 @app.get("/whoami")
-async def whoami(credentials: HTTPBasicCredentials = Depends(security)):
-    user = get_current_user(credentials)
+def whoami(user: dict = Depends(get_current_user)):
     return {"username": user["username"], "role": user["role"]}
 
+# ✅ Protected HTML pages
 @app.get("/home", response_class=HTMLResponse)
+def home(user: dict = Depends(get_current_user)):
+    return FileResponse(os.path.join(PROTECTED_HTML_DIR, "layout.html"))
+
 @app.get("/user-guide", response_class=HTMLResponse)
+def user_guide(user: dict = Depends(get_current_user)):
+    return FileResponse(os.path.join(PROTECTED_HTML_DIR, "layout.html"))
+
 @app.get("/example", response_class=HTMLResponse)
-async def shared_layout():
-    return FileResponse(os.path.join(STATIC_HTML_DIR, "layout.html"))
+def example(user: dict = Depends(get_current_user)):
+    return FileResponse(os.path.join(PROTECTED_HTML_DIR, "layout.html"))
+
+# ✅ Secure all smarttax APIs
+app.include_router(smarttaxagent_router, dependencies=[Depends(get_current_user)])

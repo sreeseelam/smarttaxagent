@@ -22,7 +22,7 @@
 
   .menu a,
   .menu button {
-    background-color: #e5e7eb; /* Neutral gray */
+    background-color: #e5e7eb;
     border: none;
     padding: 8px 14px;
     border-radius: 6px;
@@ -52,27 +52,17 @@
 
 <script>
   const auth = localStorage.getItem('auth');
+  const username = localStorage.getItem('username');
 
-  if (!auth) {
+  if (!auth || !username) {
+    localStorage.clear();
     window.location.href = '/';
   } else {
-    fetch('/whoami', {
-      headers: {
-        Authorization: 'Basic ' + auth
-      }
-    })
-    .then(res => res.ok ? res.json() : Promise.reject())
-    .then(user => {
-      document.getElementById('welcome-message').textContent = `Welcome ${user.username}`;
-    })
-    .catch(() => {
-      localStorage.removeItem('auth');
-      window.location.href = '/';
-    });
+    document.getElementById('welcome-message').textContent = `Welcome ${username}`;
   }
 
   function logout() {
-    localStorage.removeItem('auth');
+    localStorage.clear();
     window.location.href = '/';
   }
 </script>
