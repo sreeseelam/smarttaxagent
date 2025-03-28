@@ -81,7 +81,10 @@ async function startSession() {
   try {
     const res = await fetch('/start-session', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Basic ' + auth
+      },
       body: JSON.stringify({ session_id: sessionId })
     });
     const data = await res.json();
@@ -113,7 +116,10 @@ async function sendMessage() {
   try {
     const res = await fetch('/send-message', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Basic ' + auth
+      },
       body: JSON.stringify({
         session_id: sessionId,
         message,
@@ -134,7 +140,10 @@ async function sendMessage() {
 async function resetChat() {
   await fetch('/clear-session', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Basic ' + auth
+    },
     body: JSON.stringify({ session_id: sessionId })
   });
   sessionId = "session_" + Math.random().toString(36).substring(2);

@@ -20,29 +20,28 @@
 
       const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
-      const auth = btoa(`${username}:${password}`);
 
       try {
-        const res = await fetch('/whoami', {
-          headers: { Authorization: 'Basic ' + auth }
+        const res = await fetch('/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
         });
 
         if (!res.ok) throw new Error('Invalid credentials');
 
         const user = await res.json();
+        const auth = btoa(`${username}:${password}`);
 
-        // ✅ Store credentials + role in localStorage
         localStorage.setItem('auth', auth);
         localStorage.setItem('username', user.username);
-        localStorage.setItem('role', user.role);  // e.g. IndividualUser or TaxSpecialist
+        localStorage.setItem('role', user.role);
 
-        // ✅ Redirect to home page
         window.location.href = '/home';
-
       } catch (err) {
         document.getElementById('error').textContent = 'Login failed. Please try again.';
       }
     });
-  </script>  
+  </script>
 </body>
 </html>

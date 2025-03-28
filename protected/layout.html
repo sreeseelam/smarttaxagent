@@ -32,25 +32,23 @@
     }
 
     function injectCommon() {
-      fetch('/static/protected/header.html')
-        .then(res => res.text())
-        .then(html => {
-          document.getElementById('header').innerHTML = html;
-
-          // Fetch username and inject into header
-          fetch('/whoami', {
-            headers: {
-              Authorization: 'Basic ' + auth
-            }
-          })
-          .then(res => res.ok ? res.json() : Promise.reject())
-          .then(user => {
+      // Load header + user
+      fetch('/whoami', {
+        headers: { Authorization: 'Basic ' + auth }
+      })
+      .then(res => res.ok ? res.json() : Promise.reject())
+      .then(user => {
+        fetch('/protected/header.html')
+          .then(res => res.text())
+          .then(html => {
+            document.getElementById('header').innerHTML = html;
             document.getElementById('welcome-message').textContent = `Welcome ${user.username}`;
-          })
-          .catch(() => logout());
-        });
+          });
+      })
+      .catch(() => logout());
 
-      fetch('/static/protected/footer.html')
+      // Load footer
+      fetch('/protected/footer.html')
         .then(res => res.text())
         .then(html => {
           document.getElementById('footer').innerHTML = html;
@@ -59,7 +57,7 @@
 
     function loadPage(page) {
       console.log("📦 Loading page:", page);
-      fetch('/static/protected/' + page + '.html')
+      fetch('/protected/' + page + '.html')
         .then(res => res.text())
         .then(html => {
           document.getElementById('content').innerHTML = html;
@@ -68,7 +66,7 @@
           if (page === 'home') {
             console.log("💬 Injecting chat-widget.js for role:", role);
             const script = document.createElement('script');
-            script.src = `/static/protected/js/chat-widget.js`;
+            script.src = `/protected/js/chat-widget.js`;
             script.defer = true;
             document.body.appendChild(script);
           }
