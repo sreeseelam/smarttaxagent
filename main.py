@@ -22,9 +22,6 @@ app.add_middleware(
 # Static public assets
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Dynamic protected assets
-app.mount("/protected", StaticFiles(directory="protected"), name="protected")
-
 # Base directories
 BASE_DIR = os.path.dirname(__file__)
 STATIC_HTML_DIR = os.path.join(BASE_DIR, "static")
@@ -45,6 +42,11 @@ def home():
 @app.get("/example", response_class=HTMLResponse)
 def serve_layout():
     return FileResponse(os.path.join(PROTECTED_HTML_DIR, "layout.html"))
+
+@app.get("/protected/{file_path:path}", response_class=FileResponse)
+def serve_protected_file(file_path: str, user: dict = Depends(get_current_user)):
+    full_path = os.path.join(PROTECTED_HTML_DIR, file_path)
+    return FileResponse(full_path)
 
 app.include_router(auth_router)
 

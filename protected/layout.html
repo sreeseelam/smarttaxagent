@@ -38,7 +38,9 @@
       })
       .then(res => res.ok ? res.json() : Promise.reject())
       .then(user => {
-        fetch('/protected/header.html')
+        fetch('/protected/header.html', {
+          headers: { Authorization: 'Basic ' + auth }
+        })
           .then(res => res.text())
           .then(html => {
             document.getElementById('header').innerHTML = html;
@@ -48,7 +50,9 @@
       .catch(() => logout());
 
       // Load footer
-      fetch('/protected/footer.html')
+      fetch('/protected/footer.html', {
+        headers: { Authorization: 'Basic ' + auth }
+      })
         .then(res => res.text())
         .then(html => {
           document.getElementById('footer').innerHTML = html;
@@ -57,7 +61,9 @@
 
     function loadPage(page) {
       console.log("📦 Loading page:", page);
-      fetch('/protected/' + page + '.html')
+      fetch('/protected/' + page + '.html', {
+        headers: { Authorization: 'Basic ' + auth }
+      })
         .then(res => res.text())
         .then(html => {
           document.getElementById('content').innerHTML = html;
@@ -65,10 +71,24 @@
           // ✅ Inject chat-widget only on home page
           if (page === 'home') {
             console.log("💬 Injecting chat-widget.js for role:", role);
-            const script = document.createElement('script');
-            script.src = `/protected/js/chat-widget.js`;
-            script.defer = true;
-            document.body.appendChild(script);
+
+            const auth = localStorage.getItem('auth');
+
+            fetch('/protected/js/chat-widget.js', {
+              headers: {
+                Authorization: 'Basic ' + auth
+              }
+            })
+            .then(res => res.ok ? res.text() : Promise.reject())
+            .then(code => {
+              const script = document.createElement('script');
+              script.textContent = code;
+              document.body.appendChild(script);
+            })
+            .catch(err => {
+              console.error("Failed to load chat-widget.js", err);
+              logout(); // optional
+            });
           }
         });
     }
